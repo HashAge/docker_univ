@@ -1,0 +1,173 @@
+overseer_db  | The files belonging to this database system will be owned by user "postgres".
+overseer_db  | This user must also own the server process.
+overseer_db  | 
+overseer_db  | The database cluster will be initialized with locale "en_US.utf8".
+overseer_db  | The default database encoding has accordingly been set to "UTF8".
+overseer_db  | The default text search configuration will be set to "english".
+overseer_db  | 
+overseer_db  | Data page checksums are disabled.
+overseer_db  | 
+overseer_db  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+overseer_db  | creating subdirectories ... ok
+overseer_db  | selecting dynamic shared memory implementation ... posix
+overseer_db  | selecting default max_connections ... 100
+overseer_db  | selecting default shared_buffers ... 128MB
+overseer_db  | selecting default time zone ... Etc/UTC
+overseer_db  | creating configuration files ... ok
+overseer_db  | running bootstrap script ... ok
+overseer_db  | performing post-bootstrap initialization ... ok
+overseer_db  | initdb: warning: enabling "trust" authentication for local connections
+overseer_db  | You can change this by editing pg_hba.conf or using the option -A, or
+overseer_db  | --auth-local and --auth-host, the next time you run initdb.
+overseer_db  | syncing data to disk ... ok
+overseer_db  | 
+overseer_db  | 
+overseer_db  | Success. You can now start the database server using:
+overseer_db  | 
+overseer_db  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+overseer_db  | 
+overseer_db  | waiting for server to start....2025-04-15 19:10:49.568 UTC [47] LOG:  starting PostgreSQL 13.20 (Debian 13.20-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+overseer_db  | 2025-04-15 19:10:49.572 UTC [47] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+overseer_db  | 2025-04-15 19:10:49.577 UTC [48] LOG:  database system was shut down at 2025-04-15 19:10:48 UTC
+overseer_db  | 2025-04-15 19:10:49.586 UTC [47] LOG:  database system is ready to accept connections
+overseer_db  |  done
+overseer_db  | server started
+overseer_db  | CREATE DATABASE
+overseer_db  | 
+overseer_db  | 
+overseer_db  | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+overseer_db  | 
+overseer_db  | waiting for server to shut down....2025-04-15 19:10:50.150 UTC [47] LOG:  received fast shutdown request
+overseer_db  | 2025-04-15 19:10:50.153 UTC [47] LOG:  aborting any active transactions
+overseer_db  | 2025-04-15 19:10:50.163 UTC [47] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+overseer_db  | 2025-04-15 19:10:50.164 UTC [49] LOG:  shutting down
+overseer_db  | 2025-04-15 19:10:50.184 UTC [47] LOG:  database system is shut down
+overseer_db  |  done
+overseer_db  | server stopped
+overseer_db  | 
+overseer_db  | PostgreSQL init process complete; ready for start up.
+overseer_db  | 
+overseer_db  | 2025-04-15 19:10:50.292 UTC [1] LOG:  starting PostgreSQL 13.20 (Debian 13.20-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+overseer_db  | 2025-04-15 19:10:50.292 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+overseer_db  | 2025-04-15 19:10:50.292 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+overseer_db  | 2025-04-15 19:10:50.294 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+overseer_db  | 2025-04-15 19:10:50.301 UTC [62] LOG:  database system was shut down at 2025-04-15 19:10:50 UTC
+overseer_db  | 2025-04-15 19:10:50.316 UTC [1] LOG:  database system is ready to accept connections
+overseer_db  | 2025-04-15 19:10:56.926 UTC [1] LOG:  received fast shutdown request
+overseer_db  | 2025-04-15 19:10:56.927 UTC [1] LOG:  aborting any active transactions
+overseer_db  | 2025-04-15 19:10:56.929 UTC [1] LOG:  background worker "logical replication launcher" (PID 68) exited with exit code 1
+overseer_db  | 2025-04-15 19:10:56.931 UTC [63] LOG:  shutting down
+overseer_db  | 2025-04-15 19:10:56.988 UTC [1] LOG:  database system is shut down
+overseer_report  | INFO:     Started server process [1]
+overseer_report  | INFO:     Waiting for application startup.
+overseer_report  | INFO:     Application startup complete.
+overseer_report  | INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+overseer_report  | INFO:     Shutting down
+overseer_report  | INFO:     Waiting for application shutdown.
+overseer_report  | INFO:     Application shutdown complete.
+overseer_report  | INFO:     Finished server process [1]
+overseer_crud    | /usr/local/lib/python3.9/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+overseer_crud    | * 'orm_mode' has been renamed to 'from_attributes'
+overseer_crud    |   warnings.warn(message, UserWarning)
+overseer_crud    | INFO:     Started server process [1]
+overseer_crud    | INFO:     Waiting for application startup.
+overseer_crud    | ERROR:    Traceback (most recent call last):
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 146, in __init__
+overseer_crud    |     self._dbapi_connection = engine.raw_connection()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 3298, in raw_connection
+overseer_crud    |     return self.pool.connect()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 449, in connect
+overseer_crud    |     return _ConnectionFairy._checkout(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+overseer_crud    |     fairy = _ConnectionRecord.checkout(pool)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 713, in checkout
+overseer_crud    |     rec = pool._do_get()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/impl.py", line 180, in _do_get
+overseer_crud    |     self._dec_overflow()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+overseer_crud    |     raise exc_value.with_traceback(exc_tb)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+overseer_crud    |     return self._create_connection()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 390, in _create_connection
+overseer_crud    |     return _ConnectionRecord(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 675, in __init__
+overseer_crud    |     self.__connect()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 902, in __connect
+overseer_crud    |     pool.logger.debug("Error on connect(): %s", e)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+overseer_crud    |     raise exc_value.with_traceback(exc_tb)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 897, in __connect
+overseer_crud    |     self.dbapi_connection = connection = pool._invoke_creator(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/create.py", line 646, in connect
+overseer_crud    |     return dialect.connect(*cargs, **cparams)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 625, in connect
+overseer_crud    |     return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/psycopg2/__init__.py", line 122, in connect
+overseer_crud    |     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+overseer_crud    | psycopg2.OperationalError: connection to server at "db" (172.18.0.2), port 5432 failed: Connection refused
+overseer_crud    | 	Is the server running on that host and accepting TCP/IP connections?
+overseer_crud    | 
+overseer_crud    | 
+overseer_crud    | The above exception was the direct cause of the following exception:
+overseer_crud    | 
+overseer_crud    | Traceback (most recent call last):
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 692, in lifespan
+overseer_crud    |     async with self.lifespan_context(app) as maybe_state:
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 569, in __aenter__
+overseer_crud    |     await self._router.startup()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 671, in startup
+overseer_crud    |     handler()
+overseer_crud    |   File "/app/main.py", line 20, in startup
+overseer_crud    |     Base.metadata.create_all(bind=engine)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/schema.py", line 5925, in create_all
+overseer_crud    |     bind._run_ddl_visitor(
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+overseer_crud    |     with self.begin() as conn:
+overseer_crud    |   File "/usr/local/lib/python3.9/contextlib.py", line 119, in __enter__
+overseer_crud    |     return next(self.gen)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 3238, in begin
+overseer_crud    |     with self.connect() as conn:
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 3274, in connect
+overseer_crud    |     return self._connection_cls(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 148, in __init__
+overseer_crud    |     Connection._handle_dbapi_exception_noconnection(
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2439, in _handle_dbapi_exception_noconnection
+overseer_crud    |     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 146, in __init__
+overseer_crud    |     self._dbapi_connection = engine.raw_connection()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 3298, in raw_connection
+overseer_crud    |     return self.pool.connect()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 449, in connect
+overseer_crud    |     return _ConnectionFairy._checkout(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+overseer_crud    |     fairy = _ConnectionRecord.checkout(pool)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 713, in checkout
+overseer_crud    |     rec = pool._do_get()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/impl.py", line 180, in _do_get
+overseer_crud    |     self._dec_overflow()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+overseer_crud    |     raise exc_value.with_traceback(exc_tb)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+overseer_crud    |     return self._create_connection()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 390, in _create_connection
+overseer_crud    |     return _ConnectionRecord(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 675, in __init__
+overseer_crud    |     self.__connect()
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 902, in __connect
+overseer_crud    |     pool.logger.debug("Error on connect(): %s", e)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+overseer_crud    |     raise exc_value.with_traceback(exc_tb)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/pool/base.py", line 897, in __connect
+overseer_crud    |     self.dbapi_connection = connection = pool._invoke_creator(self)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/create.py", line 646, in connect
+overseer_crud    |     return dialect.connect(*cargs, **cparams)
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 625, in connect
+overseer_crud    |     return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+overseer_crud    |   File "/usr/local/lib/python3.9/site-packages/psycopg2/__init__.py", line 122, in connect
+overseer_crud    |     conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+overseer_crud    | sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "db" (172.18.0.2), port 5432 failed: Connection refused
+overseer_crud    | 	Is the server running on that host and accepting TCP/IP connections?
+overseer_crud    | 
+overseer_crud    | (Background on this error at: https://sqlalche.me/e/20/e3q8)
+overseer_crud    | 
+overseer_crud    | ERROR:    Application startup failed. Exiting.

@@ -3,30 +3,46 @@ version: '3.8'
 services:
   db:
     image: postgres:13
+    container_name: overseer_db
     environment:
       POSTGRES_USER: overseer
       POSTGRES_PASSWORD: overseer_pass
       POSTGRES_DB: overseer_db
-      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U overseer -d overseer_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - overseer_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - backend
+    expose:
+      - "5432"  # закрыт от хоста
 
-  app:
+  crud_service:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - DATABASE_URL=postgresql://overseer:overseer_pass@db:5432/overseer_db
+    container_name: overseer_crud
+    depends_on:
+      - db
     ports:
       - "8000:8000"
+    networks:
+      - backend
+
+  report_service:
+    build:
+      context: ./reports
+      dockerfile: Dockerfile
+    container_name: overseer_report
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    ports:
+      - "8001:8001"
+    networks:
+      - backend
 
 volumes:
-  postgres_data:
+  overseer_data:
+
+networks:
+  backend:
+    driver: bridge
