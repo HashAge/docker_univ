@@ -1,10 +1,15 @@
 from pydantic import BaseModel
+import uuid
 
-class ItemCreate(BaseModel):
+class ItemBase(BaseModel):
     name: str
-    description: str
+    description: str | None = None
 
-class ItemUpdate(BaseModel):
-    name: str
-    description: str
+class ItemCreate(ItemBase):
+    pass
 
+class ItemUpdate(ItemBase):
+    pass
+
+class ItemOut(ItemBase):
+    id: uuid.UUID

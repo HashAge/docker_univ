@@ -1,77 +1,71 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from uuid import uuid4
-from models import Item
-from schemas import ItemCreate, ItemUpdate
-from database import SessionLocal, engine
+from fastapi import FastAPI, HTTPException, Depends, Response
 from sqlalchemy.orm import Session
+from database import SessionLocal, init_db
+from models import Item
+from schemas import ItemCreate, ItemUpdate, ItemOut
+import uuid
 import httpx
+from minio import Minio
 
-Item.metadata.create_all(bind=engine)
 app = FastAPI()
+init_db()
 
-@app.get("/")
-def read_items():
+def get_db():
     db = SessionLocal()
-    items = db.query(Item).all()
-    db.close()
-    return items
+    try:
+        yield db
+    finally:
+        db.close()
 
-@app.get("/{item_id}")
-def read_item(item_id: str):
-    db = SessionLocal()
-    item = db.query(Item).filter(Item.id == item_id).first()
-    db.close()
-    if item:
-        return item
-    return JSONResponse(status_code=404, content={"detail": "Not found"})
+@app.get("/items", response_model=list[ItemOut])
+def list_items(db: Session = Depends(get_db)):
+    return db.query(Item).all()
 
-@app.post("/")
-def create_item(item: ItemCreate):
-    db = SessionLocal()
-    db_item = Item(id=str(uuid4()), name=item.name, description=item.description)
+@app.get("/items/{item_id}", response_model=ItemOut)
+def get_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
+    item = db.query(Item).get(item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+@app.post("/items", response_model=ItemOut)
+def create_item(item: ItemCreate, db: Session = Depends(get_db)):
+    db_item = Item(name=item.name, description=item.description)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
-    db.close()
     return db_item
 
-@app.put("/{item_id}")
-def update_item(item_id: str, item: ItemUpdate):
-    db = SessionLocal()
-    db_item = db.query(Item).filter(Item.id == item_id).first()
+@app.put("/items/{item_id}", response_model=ItemOut)
+def update_item(item_id: uuid.UUID, updated: ItemUpdate, db: Session = Depends(get_db)):
+    db_item = db.query(Item).get(item_id)
     if not db_item:
-        db.close()
-        return JSONResponse(status_code=404, content={"detail": "Not found"})
-    db_item.name = item.name
-    db_item.description = item.description
+        raise HTTPException(status_code=404, detail="Item not found")
+    db_item.name = updated.name
+    db_item.description = updated.description
     db.commit()
     db.refresh(db_item)
-    db.close()
     return db_item
 
-@app.delete("/{item_id}")
-def delete_item(item_id: str):
-    db = SessionLocal()
-    item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        db.close()
-        return JSONResponse(status_code=404, content={"detail": "Not found"})
-    db.delete(item)
+@app.delete("/items/{item_id}")
+def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
+    db_item = db.query(Item).get(item_id)
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    db.delete(db_item)
     db.commit()
-    db.close()
     return {"detail": "Deleted"}
 
-@app.api_route("/reports/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def proxy_reports(request: Request, path: str):
-    async with httpx.AsyncClient() as client:
-        url = f"http://report_service:8001/{path}"
-        proxied_request = client.build_request(
-            request.method,
-            url,
-            headers=request.headers.raw,
-            content=await request.body()
-        )
-        response = await client.send(proxied_request)
-        return JSONResponse(status_code=response.status_code, content=response.json())
+@app.get("/report/download")
+def get_report():
+    response = httpx.post("http://report_service:8001/report")
+    file_name = response.json()["file"]
 
+    client = Minio("minio:9000",
+                   access_key="minioadmin",
+                   secret_key="minioadmin",
+                   secure=False)
+
+    data = client.get_object("reports", file_name)
+    content = data.read()
+    return Response(content=content, media_type="text/csv")

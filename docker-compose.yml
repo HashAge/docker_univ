@@ -19,11 +19,11 @@ services:
   crud_service:
     build:
       context: ./app
-      dockerfile: Dockerfile
     container_name: overseer_crud
     depends_on:
       - db
       - report_service
+      - minio
     ports:
       - "8000:8000"
     networks:
@@ -32,17 +32,32 @@ services:
   report_service:
     build:
       context: ./reports
-      dockerfile: Dockerfile
     container_name: overseer_report
     depends_on:
       - db
+      - minio
     expose:
       - "8001"
     networks:
       - backend
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    networks:
+      - backend
+
 volumes:
   overseer_data:
+  minio_data:
 
 networks:
   backend:
