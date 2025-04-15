@@ -11,18 +11,19 @@ services:
     volumes:
       - overseer_data:/var/lib/postgresql/data
     restart: always
+    expose:
+      - "5432"
     networks:
       - backend
-    expose:
-      - "5432"  # закрыт от хоста
 
   crud_service:
     build:
-      context: .
+      context: ./app
       dockerfile: Dockerfile
     container_name: overseer_crud
     depends_on:
       - db
+      - report_service
     ports:
       - "8000:8000"
     networks:
@@ -35,8 +36,8 @@ services:
     container_name: overseer_report
     depends_on:
       - db
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     networks:
       - backend
 
@@ -46,3 +47,4 @@ volumes:
 networks:
   backend:
     driver: bridge
+

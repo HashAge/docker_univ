@@ -1,101 +1,77 @@
-import os
-import sys
-import uuid
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from uuid import uuid4
+from models import Item
+from schemas import ItemCreate, ItemUpdate
+from database import SessionLocal, engine
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+import httpx
 
-# Добавляем путь к папке app в PYTHONPATH
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Теперь можно использовать абсолютные импорты
-from app.database import SessionLocal, engine, Base
-from app.models import Item
-from app.schemas import ItemBase, ItemCreate, Item as ItemSchema
-
+Item.metadata.create_all(bind=engine)
 app = FastAPI()
 
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)
-    try:
-        with SessionLocal() as db:
-            db.execute(text("SELECT 1"))
-        print("✅ Database connected")
-    except Exception as e:
-        print(f"❌ Database connection failed: {e}")
-        raise
-
-def get_db():
+@app.get("/")
+def read_items():
     db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    items = db.query(Item).all()
+    db.close()
+    return items
 
-# Инициализация БД при старте
-@app.on_event("startup")
-def init_db():
-    try:
-        Base.metadata.create_all(bind=engine)
-        with SessionLocal() as db:
-            db.execute(text("SELECT 1"))
-            print("✅ Database connection established")
-    except Exception as e:
-        print(f"❌ Database connection failed: {e}")
-        raise
-
-# Dependency для получения сессии БД
-def get_db():
+@app.get("/{item_id}")
+def read_item(item_id: str):
     db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@app.get("/", response_model=list[ItemSchema])
-def read_items(db: Session = Depends(get_db)):
-    """Получить все записи"""
-    return db.query(Item).all()
-
-@app.get("/{item_id}", response_model=ItemSchema)
-def read_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
-    """Получить запись по ID"""
     item = db.query(Item).filter(Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return item
+    db.close()
+    if item:
+        return item
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
 
-@app.post("/", response_model=ItemSchema)
-def create_item(item: ItemCreate, db: Session = Depends(get_db)):
-    """Создать новую запись"""
-    db_item = Item(**item.dict())
+@app.post("/")
+def create_item(item: ItemCreate):
+    db = SessionLocal()
+    db_item = Item(id=str(uuid4()), name=item.name, description=item.description)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
+    db.close()
     return db_item
 
-@app.put("/{item_id}", response_model=ItemSchema)
-def update_item(item_id: uuid.UUID, item: ItemCreate, db: Session = Depends(get_db)):
-    """Обновить существующую запись"""
+@app.put("/{item_id}")
+def update_item(item_id: str, item: ItemUpdate):
+    db = SessionLocal()
     db_item = db.query(Item).filter(Item.id == item_id).first()
     if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    
-    for key, value in item.dict().items():
-        setattr(db_item, key, value)
-    
+        db.close()
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+    db_item.name = item.name
+    db_item.description = item.description
     db.commit()
     db.refresh(db_item)
+    db.close()
     return db_item
 
 @app.delete("/{item_id}")
-def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
-    """Удалить запись"""
-    db_item = db.query(Item).filter(Item.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    
-    db.delete(db_item)
+def delete_item(item_id: str):
+    db = SessionLocal()
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        db.close()
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+    db.delete(item)
     db.commit()
-    return {"message": "Item deleted successfully"}
+    db.close()
+    return {"detail": "Deleted"}
+
+@app.api_route("/reports/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def proxy_reports(request: Request, path: str):
+    async with httpx.AsyncClient() as client:
+        url = f"http://report_service:8001/{path}"
+        proxied_request = client.build_request(
+            request.method,
+            url,
+            headers=request.headers.raw,
+            content=await request.body()
+        )
+        response = await client.send(proxied_request)
+        return JSONResponse(status_code=response.status_code, content=response.json())
+
