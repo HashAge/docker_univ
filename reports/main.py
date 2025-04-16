@@ -4,7 +4,7 @@ from models import Item
 
 app = FastAPI()
 
-@app.get("/report")
+@app.get("/report/download")
 def generate_report():
     db = SessionLocal()
     items = db.query(Item).all()

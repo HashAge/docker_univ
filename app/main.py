@@ -62,16 +62,10 @@ def delete_item(item_id: str):
     db.close()
     return {"detail": "Deleted"}
 
-@app.api_route("/reports/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def proxy_reports(request: Request, path: str):
+@app.get("/report/download")
+async def proxy_report_download(request: Request):
     async with httpx.AsyncClient() as client:
-        url = f"http://report_service:8001/{path}"
-        proxied_request = client.build_request(
-            request.method,
-            url,
-            headers=request.headers.raw,
-            content=await request.body()
-        )
-        response = await client.send(proxied_request)
+        url = "http://report_service:8001/report/download"
+        response = await client.get(url)
         return JSONResponse(status_code=response.status_code, content=response.json())
 

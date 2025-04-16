@@ -5,7 +5,7 @@ def generate_report():
     db = SessionLocal()
     try:
         result = db.execute(text("SELECT * FROM items"))
-        rows = result.fetchall()
+        rows = result.mappings().all()
         return [dict(row) for row in rows]
     finally:
         db.close()
