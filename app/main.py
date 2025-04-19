@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends, Response
+from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from database import SessionLocal, init_db
-from models import Item
-from schemas import ItemCreate, ItemUpdate, ItemOut
-import uuid
+from database import SessionLocal, engine, init_db
+from models import Base, Item
 import httpx
-from minio import Minio
+import io
+import uuid
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 init_db()
@@ -17,55 +17,63 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/items", response_model=list[ItemOut])
-def list_items(db: Session = Depends(get_db)):
+@app.get("/items")
+def read_items(db: Session = Depends(get_db)):
     return db.query(Item).all()
 
-@app.get("/items/{item_id}", response_model=ItemOut)
-def get_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
-    item = db.query(Item).get(item_id)
+@app.get("/items/{item_id}")
+def read_item(item_id: str, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@app.post("/items", response_model=ItemOut)
-def create_item(item: ItemCreate, db: Session = Depends(get_db)):
-    db_item = Item(name=item.name, description=item.description)
-    db.add(db_item)
+@app.post("/items")
+def create_item(name: str, description: str, db: Session = Depends(get_db)):
+    new_item = Item(id=str(uuid.uuid4()), name=name, description=description)
+    db.add(new_item)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(new_item)
+    return new_item
 
-@app.put("/items/{item_id}", response_model=ItemOut)
-def update_item(item_id: uuid.UUID, updated: ItemUpdate, db: Session = Depends(get_db)):
-    db_item = db.query(Item).get(item_id)
-    if not db_item:
+@app.put("/items/{item_id}")
+def update_item(item_id: str, name: str, description: str, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    db_item.name = updated.name
-    db_item.description = updated.description
+    item.name = name
+    item.description = description
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(item)
+    return item
 
 @app.delete("/items/{item_id}")
-def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)):
-    db_item = db.query(Item).get(item_id)
-    if not db_item:
+def delete_item(item_id: str, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    db.delete(db_item)
+    db.delete(item)
     db.commit()
-    return {"detail": "Deleted"}
+    return {"detail": "Item deleted"}
 
 @app.get("/report/download")
-def get_report():
-    response = httpx.post("http://report_service:8001/report")
-    file_name = response.json()["file"]
+async def download_report():
+    async with httpx.AsyncClient() as client:
+        # 1. Запросить ссылку у report_service
+        try:
+            response = await client.get("http://report_service:8001/report/download")
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Ошибка при запросе отчёта: {str(e)}")
 
-    client = Minio("minio:9000",
-                   access_key="minioadmin",
-                   secret_key="minioadmin",
-                   secure=False)
+        url = data.get("url")
+        if not url:
+            raise HTTPException(status_code=500, detail="Не удалось получить ссылку на отчёт")
 
-    data = client.get_object("reports", file_name)
-    content = data.read()
-    return Response(content=content, media_type="text/csv")
+        # 2. Скачать файл по pre-signed URL
+        file_response = await client.get(url)
+
+        return StreamingResponse(io.BytesIO(file_response.content), media_type="text/csv", headers={
+            "Content-Disposition": f"attachment; filename=report.csv"
+        })
